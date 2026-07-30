@@ -41,7 +41,7 @@ ranks:
     benefits: "Champion prefix; loan cap 150,000 G"
 
 messages:
-  prefix: "&8[&5Ranks&8] &r"
+  prefix: ""
   no-permission: "&cYou do not have permission."
   players-only: "&cPlayers only."
   disabled: "&eRank purchases are disabled."

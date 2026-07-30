@@ -53,7 +53,7 @@ public record RanksConfig(
         return new RanksConfig(
                 cfg.getBoolean("treasury_sink", true),
                 Collections.unmodifiableList(ranks),
-                cfg.getString("messages.prefix", "&8[&5Ranks&8] &r"),
+                cfg.getString("messages.prefix", ""),
                 cfg.getString("messages.no-permission", "&cYou do not have permission."),
                 cfg.getString("messages.players-only", "&cPlayers only."),
                 cfg.getString("messages.disabled", "&eRank purchases are disabled."),
