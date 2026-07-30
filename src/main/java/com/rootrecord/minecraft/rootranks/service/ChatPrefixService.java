@@ -77,13 +77,21 @@ public final class ChatPrefixService {
     }
 
     /**
-     * Single chat label: personal player rank only (Explorer → Champion). Staff groups like
-     * Admin/Mod do not replace it — use {@link #badgePrefix} if a staff badge is needed elsewhere.
-     * Example: {@code Wanderer }.
+     * Single chat label: personal player rank (Explorer → Champion), plus {@code [Pro]} when the
+     * player holds the Pro membership group. Staff groups like Admin/Mod do not replace the rank.
+     * Example: {@code Wanderer [Pro] }.
      */
     public String chatLabel(UUID playerId) {
         Resolved r = resolve(playerId);
-        return colorize(colorFor(r.playerGroup()) + r.playerRankName() + " ");
+        String label = colorize(colorFor(r.playerGroup()) + r.playerRankName() + " ");
+        if (perms.hasGroup(playerId, "pro")) {
+            String pro = colorize(perms.groupPrefix("pro"));
+            if (pro == null || pro.isBlank()) {
+                pro = colorize("&8[&bPro&8]&r ");
+            }
+            label = label + pro;
+        }
+        return label;
     }
 
     public String playerRankName(UUID playerId) {

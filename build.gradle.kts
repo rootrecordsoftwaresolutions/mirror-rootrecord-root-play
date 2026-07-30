@@ -2,7 +2,7 @@ plugins {
     java
 }
 
-version = "1.7.2"
+version = "1.7.14"
 
 repositories {
     maven("https://jitpack.io")

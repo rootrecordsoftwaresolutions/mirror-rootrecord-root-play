@@ -94,18 +94,20 @@ public final class HelpCloudClient {
 
     private String exchange(String method, String path, String jsonBody)
             throws IOException, InterruptedException {
-        String primary = com.rootrecord.minecraft.common.config.RootMcApiBases.normalize(settings.apiBase());
-        if (primary.equalsIgnoreCase(com.rootrecord.minecraft.common.config.RootMcApiBases.PRODUCTION)) {
-            return exchangeOnce(
-                    com.rootrecord.minecraft.common.config.RootMcApiBases.LOCAL_EDGE, method, path, jsonBody);
-        }
+        String configured = com.rootrecord.minecraft.common.config.RootMcApiBases.normalize(settings.apiBase());
+        String preferred = com.rootrecord.minecraft.common.config.RootMcApiBases.preferredBase(configured);
         try {
-            return exchangeOnce(primary, method, path, jsonBody);
+            return exchangeOnce(preferred, method, path, jsonBody);
         } catch (IOException first) {
-            String alt = com.rootrecord.minecraft.common.config.RootMcApiBases.alternateAfterThrottle(primary);
-            if (alt == null
-                    || !com.rootrecord.minecraft.common.config.RootMcApiBases.looksLikeThrottleMessage(
-                            first.getMessage())) {
+            String alt = com.rootrecord.minecraft.common.config.RootMcApiBases.fallbackBase(preferred);
+            if (alt == null || alt.equalsIgnoreCase(preferred)) {
+                throw first;
+            }
+            boolean retry = com.rootrecord.minecraft.common.config.RootMcApiBases.looksLikeThrottleMessage(
+                            first.getMessage())
+                    || com.rootrecord.minecraft.common.config.RootMcApiBases.looksLikeEdgeDownMessage(
+                            first.getMessage());
+            if (!retry) {
                 throw first;
             }
             return exchangeOnce(alt, method, path, jsonBody);
@@ -126,7 +128,8 @@ public final class HelpCloudClient {
         HttpRequest request = authorized(builder);
         HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
-            throw new IOException("HTTP " + response.statusCode());
+            String body = response.body() == null ? "" : response.body();
+            throw new IOException("HTTP " + response.statusCode() + ": " + body);
         }
         return response.body() == null ? "" : response.body();
     }
